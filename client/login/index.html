@@ -3,138 +3,181 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GO2 Maratona do Rio — Painel de Operações</title>
+  <title>GO2 — Painel de Operações</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0d1b2a;
+      background: #1a1a1a;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Fundo com gradiente sutil */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(61,179,63,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(61,179,63,0.08) 0%, transparent 50%);
+      pointer-events: none;
     }
 
     .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 40px 36px;
+      background: #242424;
+      border-radius: 20px;
+      padding: 48px 40px 40px;
       width: 100%;
-      max-width: 400px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+      max-width: 420px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06);
+      position: relative;
+      z-index: 1;
     }
 
+    /* ── Logo GO2 ── */
     .logo-area {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 36px;
     }
 
-    .event-badge {
+    .go2-logo {
       display: inline-block;
-      background: #0d47a1;
-      color: #fff;
-      font-size: 11px;
-      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .go2-logo svg {
+      width: 120px;
+      height: auto;
+      filter: drop-shadow(0 4px 16px rgba(61,179,63,0.35));
+    }
+
+    .logo-area h2 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #888;
       letter-spacing: 2px;
       text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-bottom: 12px;
-    }
-
-    .logo-area h1 {
-      font-size: 26px;
-      font-weight: 800;
-      color: #0d1b2a;
-      line-height: 1.1;
-    }
-
-    .logo-area h1 span {
-      color: #1565c0;
+      margin-bottom: 4px;
     }
 
     .logo-area p {
-      margin-top: 6px;
-      font-size: 13px;
-      color: #607d8b;
+      font-size: 15px;
+      color: #ccc;
+      font-weight: 400;
     }
 
+    /* ── Divisor ── */
     .divider {
       border: none;
-      border-top: 1px solid #eef2f7;
+      border-top: 1px solid rgba(255,255,255,.08);
       margin: 28px 0;
     }
 
+    /* ── Formulário ── */
     label {
       display: block;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
-      color: #607d8b;
+      color: #666;
       text-transform: uppercase;
-      letter-spacing: .5px;
-      margin-bottom: 6px;
+      letter-spacing: 1px;
+      margin-bottom: 7px;
     }
 
-    .field { margin-bottom: 18px; }
+    .field { margin-bottom: 20px; }
 
     input {
       width: 100%;
-      padding: 13px 14px;
-      border: 2px solid #dde3ec;
+      padding: 14px 16px;
+      background: #1a1a1a;
+      border: 1.5px solid rgba(255,255,255,.1);
       border-radius: 10px;
       font-size: 15px;
       font-family: inherit;
-      color: #1a2332;
+      color: #fff;
       outline: none;
-      transition: border-color .2s;
+      transition: border-color .2s, box-shadow .2s;
     }
-    input:focus { border-color: #1565c0; }
+    input::placeholder { color: #444; }
+    input:focus {
+      border-color: #3db33f;
+      box-shadow: 0 0 0 3px rgba(61,179,63,.15);
+    }
 
     .btn {
       width: 100%;
-      padding: 14px;
-      background: #1565c0;
+      padding: 15px;
+      background: #3db33f;
       color: #fff;
       border: none;
       border-radius: 10px;
       font-size: 16px;
       font-weight: 700;
       cursor: pointer;
-      transition: background .2s, transform .1s;
+      transition: background .2s, transform .1s, box-shadow .2s;
       margin-top: 4px;
+      letter-spacing: .3px;
+      box-shadow: 0 4px 20px rgba(61,179,63,.35);
     }
-    .btn:hover  { background: #1976d2; }
+    .btn:hover {
+      background: #45c447;
+      box-shadow: 0 6px 24px rgba(61,179,63,.45);
+    }
     .btn:active { transform: scale(.98); }
-    .btn:disabled { background: #90a4ae; cursor: not-allowed; }
+    .btn:disabled { background: #333; box-shadow: none; color: #666; cursor: not-allowed; }
 
+    /* ── Erro ── */
     .error {
-      background: #ffebee;
-      border: 1px solid #ef9a9a;
-      color: #c62828;
+      background: rgba(239,68,68,.12);
+      border: 1px solid rgba(239,68,68,.3);
+      color: #f87171;
       border-radius: 8px;
-      padding: 11px 14px;
+      padding: 12px 14px;
       font-size: 13px;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
       display: none;
     }
     .error.show { display: block; }
 
+    /* ── Footer ── */
     .footer {
       text-align: center;
-      margin-top: 28px;
+      margin-top: 32px;
       font-size: 11px;
-      color: #90a4ae;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    .footer span {
+      color: #3db33f;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
   <div class="card">
+
     <div class="logo-area">
-      <div class="event-badge">GO2 · Maratona do Rio</div>
-      <h1>🚗 Transporte<span>RJ</span></h1>
-      <p>Painel de Operações — Acesso restrito</p>
+      <div class="go2-logo">
+        <!-- Logo GO2 em SVG — mesma tipografia arredondada e cor verde -->
+        <svg viewBox="0 0 300 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- G -->
+          <path d="M30 80C30 47.6 50.6 24 82 24C100 24 114 31.6 122 44L104 57.6C99.2 50.4 91.6 46 82 46C63.6 46 54 60.8 54 80C54 99.2 63.6 114 82 114C96 114 105.6 106.4 108.4 95.2H84V75.2H132V84C132 110 114 136 82 136C50.6 136 30 112.4 30 80Z" fill="#3db33f"/>
+          <!-- O -->
+          <path d="M148 80C148 47.6 168.8 24 200 24C231.2 24 252 47.6 252 80C252 112.4 231.2 136 200 136C168.8 136 148 112.4 148 80ZM228 80C228 60.8 216.4 46 200 46C183.6 46 172 60.8 172 80C172 99.2 183.6 114 200 114C216.4 114 228 99.2 228 80Z" fill="#3db33f"/>
+          <!-- 2 -->
+          <path d="M268 132L296 100C304 91.2 308 83.6 308 75.6C308 62.4 299.6 53.6 287.2 53.6C275.6 53.6 267.2 61.2 265.6 73.6L246.8 71.2C249.6 50 264.4 36 287.2 36C311.2 36 327.2 52 327.2 75.6C327.2 89.2 321.6 100.8 309.2 114L294 132H328V150H268V132Z" fill="#3db33f"/>
+        </svg>
+      </div>
+      <h2>Painel de Operações</h2>
+      <p>Rastreamento de Transporte Executivo</p>
     </div>
 
     <hr class="divider">
@@ -145,20 +188,24 @@
       <div class="field">
         <label for="username">Usuário</label>
         <input type="text" id="username" name="username"
-               placeholder="seu.usuario" autocomplete="username"
-               autocapitalize="none" required>
+               placeholder="seu.usuario"
+               autocomplete="username"
+               autocapitalize="none"
+               required>
       </div>
       <div class="field">
         <label for="password">Senha</label>
         <input type="password" id="password" name="password"
-               placeholder="••••••••" autocomplete="current-password" required>
+               placeholder="••••••••"
+               autocomplete="current-password"
+               required>
       </div>
       <button type="submit" class="btn" id="btn-login">Entrar</button>
     </form>
 
     <div class="footer">
-      GO2 · Maratona do Rio de Janeiro 2024<br>
-      Sistema de rastreamento de transporte executivo
+      <span>GO2</span> · Sistema de Gestão de Eventos<br>
+      Acesso restrito a usuários autorizados
     </div>
   </div>
 
