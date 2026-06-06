@@ -15,6 +15,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 
+app.set('trust proxy', 1); // Railway fica atrás de proxy reverso
 app.use(cors());
 app.use(express.json());
 
