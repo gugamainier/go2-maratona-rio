@@ -5,6 +5,7 @@ import CarList from './components/CarList.jsx';
 import AlertBanner from './components/AlertBanner.jsx';
 import QRManager from './components/QRManager.jsx';
 import HistoryView from './components/HistoryView.jsx';
+import EventsManager from './components/EventsManager.jsx';
 
 function playAlert() {
   try {
@@ -97,6 +98,9 @@ export default function App() {
           <button className={`nav-btn ${tab === 'qr' ? 'active' : ''}`} onClick={() => setTab('qr')}>
             📲 QR Codes
           </button>
+          <button className={`nav-btn ${tab === 'events' ? 'active' : ''}`} onClick={() => setTab('events')}>
+            📅 Eventos
+          </button>
           <button className="nav-btn logout-btn" onClick={async () => {
             await fetch('/auth/logout', { method: 'POST' });
             window.location.href = '/login';
@@ -123,6 +127,7 @@ export default function App() {
 
       {tab === 'qr' && <QRManager />}
       {tab === 'history' && <HistoryView />}
+      {tab === 'events' && <EventsManager />}
     </div>
   );
 }

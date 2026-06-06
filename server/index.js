@@ -132,6 +132,71 @@ app.post('/api/sessions', (req, res) => {
 // ── API protegida (requer login) ──────────────────────────────────────────────
 app.use('/api', auth.requireAuth);
 
+// ── Eventos ───────────────────────────────────────────────────────────────────
+app.get('/api/events', (req, res) => {
+  const events = db.prepare('SELECT * FROM events ORDER BY created_at DESC').all();
+  res.json(events.map(e => ({
+    ...e,
+    routes: db.prepare('SELECT id, name, color, departure_times, created_at FROM routes WHERE event_id = ? ORDER BY created_at ASC').all(e.id).map(r => ({
+      ...r,
+      departure_times: JSON.parse(r.departure_times || '[]'),
+    })),
+  })));
+});
+
+app.post('/api/events', (req, res) => {
+  const { name, event_date, location } = req.body;
+  if (!name?.trim()) return res.status(400).json({ error: 'Nome do evento é obrigatório' });
+  const info = db.prepare('INSERT INTO events (name, event_date, location, created_at) VALUES (?, ?, ?, ?)')
+    .run(name.trim(), event_date || '', location || '', Date.now());
+  res.json({ id: info.lastInsertRowid, name: name.trim(), event_date, location, routes: [] });
+});
+
+app.put('/api/events/:id', (req, res) => {
+  const { name, event_date, location } = req.body;
+  db.prepare('UPDATE events SET name = ?, event_date = ?, location = ? WHERE id = ?')
+    .run(name, event_date || '', location || '', req.params.id);
+  res.json({ ok: true });
+});
+
+app.delete('/api/events/:id', (req, res) => {
+  db.prepare('DELETE FROM events WHERE id = ?').run(req.params.id);
+  res.json({ ok: true });
+});
+
+// ── Rotas de evento ───────────────────────────────────────────────────────────
+app.post('/api/events/:eventId/routes', (req, res) => {
+  const { name, color, coordinates, checkpoints, departure_times } = req.body;
+  if (!name?.trim()) return res.status(400).json({ error: 'Nome da rota é obrigatório' });
+  if (!coordinates?.length) return res.status(400).json({ error: 'Desenhe a rota no mapa' });
+
+  const info = db.prepare(`
+    INSERT INTO routes (event_id, name, color, coordinates, checkpoints, departure_times, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    req.params.eventId,
+    name.trim(),
+    color || '#3388ff',
+    JSON.stringify(coordinates),
+    JSON.stringify(checkpoints || []),
+    JSON.stringify(departure_times || []),
+    Date.now(),
+  );
+  res.json({ id: info.lastInsertRowid });
+});
+
+app.put('/api/routes/:id', (req, res) => {
+  const { name, color, coordinates, checkpoints, departure_times } = req.body;
+  db.prepare(`UPDATE routes SET name=?, color=?, coordinates=?, checkpoints=?, departure_times=? WHERE id=?`)
+    .run(name, color, JSON.stringify(coordinates), JSON.stringify(checkpoints || []), JSON.stringify(departure_times || []), req.params.id);
+  res.json({ ok: true });
+});
+
+app.delete('/api/routes/:id', (req, res) => {
+  db.prepare('DELETE FROM routes WHERE id = ?').run(req.params.id);
+  res.json({ ok: true });
+});
+
 app.get('/api/sessions', (req, res) => {
   const rows = db.prepare(`
     SELECT s.*, r.name AS route_name, r.color, r.coordinates, r.checkpoints
