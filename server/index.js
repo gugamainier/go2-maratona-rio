@@ -25,8 +25,12 @@ const PORT = parseInt(process.env.PORT || '3000');
 const SESSION_SECRET = process.env.SESSION_SECRET || 'go2-maratona-rio-secret-2024';
 
 // ── Sessions ─────────────────────────────────────────────────────────────────
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '../data');
+const fs = require('fs');
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
 app.use(session({
-  store: new SQLiteStore({ db: 'sessions.db', dir: path.join(__dirname, '../data') }),
+  store: new SQLiteStore({ db: 'sessions.db', dir: DATA_DIR }),
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
