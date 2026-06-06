@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1565c0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Rastreamento">
+  <link rel="manifest" href="manifest.json">
+  <title>Rastreamento — Motorista</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Tela 1: Formulário ── -->
+  <div id="screen-form" class="screen active">
+    <header class="top-bar">
+      <span class="brand">🚗 TransporteRJ</span>
+    </header>
+    <main class="form-content">
+      <h1>Registro do Motorista</h1>
+      <p class="subtitle">Preencha seus dados para iniciar</p>
+
+      <div class="route-badge">
+        <span class="route-dot" id="route-dot"></span>
+        <span id="route-label">Carregando rota...</span>
+      </div>
+
+      <form id="driver-form" novalidate>
+        <input type="hidden" id="route-id">
+        <div class="field">
+          <label for="driver-name">Nome completo</label>
+          <input type="text" id="driver-name" placeholder="João da Silva" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="driver-phone">Telefone (WhatsApp)</label>
+          <input type="tel" id="driver-phone" placeholder="(21) 99999-9999" autocomplete="tel" required>
+        </div>
+        <div class="field">
+          <label for="departure-time">Horário de saída</label>
+          <select id="departure-time"><option value="">Selecione o horário</option></select>
+        </div>
+        <div id="form-error" class="msg-error hidden"></div>
+        <button type="submit" id="btn-start" class="btn-primary">Iniciar navegação</button>
+      </form>
+    </main>
+  </div>
+
+  <!-- ── Tela 2: Permissão GPS ── -->
+  <div id="screen-gps" class="screen">
+    <div class="center-card">
+      <div class="big-icon">📍</div>
+      <h2>Permissão de localização</h2>
+      <p>Para a navegação funcionar, precisamos do GPS do seu celular.</p>
+      <p class="hint">Toque em <strong>Permitir</strong> quando o navegador perguntar.</p>
+      <button id="btn-gps" class="btn-primary">Permitir localização</button>
+      <div id="gps-error" class="msg-error hidden"></div>
+    </div>
+  </div>
+
+  <!-- ── Tela 3: Navegação ── -->
+  <div id="screen-tracking" class="screen">
+
+    <!-- Instrução principal (topo, grande) -->
+    <div class="nav-instruction" id="nav-instruction">
+      <div class="nav-arrow" id="nav-arrow">↑</div>
+      <div class="nav-text-wrap">
+        <div class="nav-action" id="nav-action">Calculando rota...</div>
+        <div class="nav-street" id="nav-street"></div>
+      </div>
+      <div class="nav-dist" id="nav-dist"></div>
+    </div>
+
+    <!-- Sub-instrução: próxima manobra -->
+    <div class="nav-next hidden" id="nav-next">
+      <span class="nav-next-arrow" id="nav-next-arrow"></span>
+      <span id="nav-next-text"></span>
+    </div>
+
+    <!-- Alerta fora de rota -->
+    <div class="alert-float hidden" id="alert-off-route">
+      ⚠️ Fora da rota — recalculando...
+    </div>
+
+    <!-- Mapa -->
+    <div id="driver-map"></div>
+
+    <!-- Barra inferior -->
+    <div class="bottom-bar">
+      <div class="bottom-info">
+        <div class="bottom-stat">
+          <span class="bottom-label">Restante</span>
+          <span class="bottom-val" id="b-dist">—</span>
+        </div>
+        <div class="bottom-stat">
+          <span class="bottom-label">Chegada est.</span>
+          <span class="bottom-val" id="b-eta">—</span>
+        </div>
+        <div class="bottom-stat">
+          <span class="bottom-label">GPS</span>
+          <span class="bottom-val" id="b-gps">—</span>
+        </div>
+      </div>
+      <div class="bottom-actions">
+        <button class="btn-icon" id="btn-mute" onclick="toggleMute()" title="Voz">🔊</button>
+        <button class="btn-icon" onclick="centerOnMe()" title="Centralizar">🎯</button>
+      </div>
+    </div>
+
+    <!-- Indicador de conexão -->
+    <div class="conn-pill" id="conn-pill">
+      <span class="conn-dot connecting" id="conn-dot"></span>
+      <span id="conn-text">Conectando...</span>
+    </div>
+
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="driver.js"></script>
+</body>
+</html>
