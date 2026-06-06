@@ -4,6 +4,21 @@
  */
 const db = require('./db');
 
+// ── Migrar rotas sem event_id para um evento padrão ───────────────────────────
+const orphanCount = db.prepare("SELECT COUNT(*) as n FROM routes WHERE event_id IS NULL").get().n;
+if (orphanCount > 0) {
+  // Verificar se já existe um evento padrão
+  let defaultEvent = db.prepare("SELECT id FROM events WHERE name = 'Rotas Importadas'").get();
+  if (!defaultEvent) {
+    const info = db.prepare("INSERT INTO events (name, event_date, location, created_at) VALUES (?, ?, ?, ?)")
+      .run('Rotas Importadas', '', 'Rio de Janeiro, RJ', Date.now());
+    defaultEvent = { id: info.lastInsertRowid };
+    console.log(`✅ Evento padrão criado (id=${defaultEvent.id}) para rotas sem evento.`);
+  }
+  db.prepare("UPDATE routes SET event_id = ? WHERE event_id IS NULL").run(defaultEvent.id);
+  console.log(`✅ ${orphanCount} rota(s) migrada(s) para o evento padrão.`);
+}
+
 const count = db.prepare('SELECT COUNT(*) as n FROM routes').get().n;
 if (count > 0) return;  // já tem dados
 

@@ -8,7 +8,7 @@ const COLORS = [
   '#f39c12','#1abc9c','#e91e63','#00bcd4','#ff5722',
 ];
 
-export default function EventsManager({ onSave }) {
+export default function EventsManager({ onSave, onSelectEvent }) {
   const [events, setEvents]       = useState([]);
   const [loading, setLoading]     = useState(true);
   const [view, setView]           = useState('list');   // 'list' | 'new-event' | 'edit-route'
@@ -282,8 +282,11 @@ export default function EventsManager({ onSave }) {
                 </div>
               </div>
               <div className="event-card-actions">
+                <button className="btn-outline-green" onClick={() => onSelectEvent?.(evt.id)}>
+                  🗺 Ver no mapa
+                </button>
                 <button className="btn-outline" onClick={() => openRouteEditor(evt)}>
-                  + Adicionar Rota
+                  + Rota
                 </button>
                 <button className="btn-danger-sm" onClick={() => deleteEvent(evt.id)}>🗑</button>
               </div>

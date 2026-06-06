@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
 
-export default function HistoryView({ selectedEventId, eventSelector }) {
+export default function HistoryView({ allRoutes = [], selectedEventId, eventSelector }) {
   const [sessions, setSessions]           = useState([]);
   const [selectedSession, setSelectedSession] = useState('');
   const [positions, setPositions]         = useState([]);
@@ -31,12 +31,7 @@ export default function HistoryView({ selectedEventId, eventSelector }) {
     return () => clearInterval(interval);
   }, [fetchSessions]);
 
-  // Filtro por evento
-  const [allRoutes, setAllRoutes] = useState([]);
-  useEffect(() => {
-    fetch('/api/routes').then(r => r.json()).then(setAllRoutes).catch(() => {});
-  }, []);
-
+  // Filtro por evento — mostra tudo se nenhum evento selecionado
   const filteredSessions = selectedEventId
     ? sessions.filter(s => {
         const route = allRoutes.find(r => r.id === s.route_id);

@@ -616,6 +616,48 @@ button {
 }
 .btn-outline:hover { background: #e3f2fd; }
 
+.btn-outline-green {
+  padding: 7px 14px;
+  background: transparent;
+  color: #2e7d32;
+  border: 1.5px solid #2e7d32;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-outline-green:hover { background: #e8f5e9; }
+
+/* ── Prompt de selecionar evento ──────────────────────────────────── */
+.select-event-prompt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 60px 24px;
+  background: var(--bg);
+  text-align: center;
+}
+
+.sep-icon  { font-size: 56px; }
+.sep-title { font-size: 20px; font-weight: 700; color: var(--text); margin: 4px 0 0; }
+.sep-sub   { font-size: 14px; color: var(--muted); }
+.sep-hint  { font-size: 13px; color: var(--muted); margin-top: 16px; }
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #1565c0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
 .btn-ghost {
   padding: 9px 16px;
   background: transparent;
