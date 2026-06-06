@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
 
-export default function HistoryView() {
+export default function HistoryView({ selectedEventId, eventSelector }) {
   const [sessions, setSessions]           = useState([]);
   const [selectedSession, setSelectedSession] = useState('');
   const [positions, setPositions]         = useState([]);
@@ -30,6 +30,19 @@ export default function HistoryView() {
     const interval = setInterval(fetchSessions, 10000);
     return () => clearInterval(interval);
   }, [fetchSessions]);
+
+  // Filtro por evento
+  const [allRoutes, setAllRoutes] = useState([]);
+  useEffect(() => {
+    fetch('/api/routes').then(r => r.json()).then(setAllRoutes).catch(() => {});
+  }, []);
+
+  const filteredSessions = selectedEventId
+    ? sessions.filter(s => {
+        const route = allRoutes.find(r => r.id === s.route_id);
+        return route && String(route.event_id) === selectedEventId;
+      })
+    : sessions;
 
   // ── Mapa ─────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -79,7 +92,7 @@ export default function HistoryView() {
 
     if (!pts.length) return;
 
-    const session = sessions.find(s => s.id === selectedSession);
+    const session = filteredSessions.find(s => s.id === selectedSession);
     const color   = session?.color || '#1565c0';
     const latlngs = pts.map(p => [p.lat, p.lng]);
 
@@ -109,7 +122,7 @@ export default function HistoryView() {
     map.fitBounds(line.getBounds(), { padding: [40, 40] });
   }
 
-  const session = sessions.find(s => s.id === selectedSession);
+  const session = filteredSessions.find(s => s.id === selectedSession);
   const offCount = positions.filter(p => p.off_route).length;
 
   const statusBadge = (s) => {
@@ -124,7 +137,10 @@ export default function HistoryView() {
       {/* ── Toolbar ── */}
       <div className="history-toolbar">
 
-        {/* Selector */}
+        {/* Seletor de evento */}
+        {eventSelector && <div style={{ alignSelf: 'center' }}>{eventSelector}</div>}
+
+        {/* Selector de motorista */}
         <div className="history-select-wrap">
           <label>Motorista / Sessão</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
@@ -134,9 +150,9 @@ export default function HistoryView() {
               className="history-select"
             >
               <option value="">
-                {loadingList ? 'Carregando...' : sessions.length === 0 ? 'Nenhuma sessão ainda' : 'Selecione um motorista...'}
+                {loadingList ? 'Carregando...' : filteredSessions.length === 0 ? 'Nenhuma sessão neste evento' : 'Selecione um motorista...'}
               </option>
-              {sessions.map(s => (
+              {filteredSessions.map(s => (
                 <option key={s.id} value={s.id}>
                   {s.driver_name} · {s.route_name} ·{' '}
                   {new Date(s.created_at).toLocaleString('pt-BR', {
@@ -217,8 +233,8 @@ export default function HistoryView() {
           <div className="empty-state" style={{ position: 'absolute', zIndex: 500, inset: 0, background: 'rgba(238,242,247,.85)' }}>
             <span className="icon">🚗</span>
             <span>
-              {sessions.length === 0
-                ? 'Nenhum motorista conectou ainda. A lista atualiza automaticamente.'
+              {filteredSessions.length === 0
+                ? 'Nenhum motorista neste evento ainda. A lista atualiza automaticamente.'
                 : 'Selecione um motorista para ver o trajeto'}
             </span>
           </div>

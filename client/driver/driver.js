@@ -240,7 +240,7 @@ function drawExtras(route) {
       iconSize: [30, 30],
       iconAnchor: [15, 30],
     })
-  }).bindTooltip('Destino: Av. Lúcio Costa').addTo(map);
+  }).bindTooltip(`🏁 Destino: ${routeData.name.split('→').pop()?.trim() || 'Destino final'}`).addTo(map);
 }
 
 // ── Atualizar instrução na tela ───────────────────────────────────────────────
@@ -481,9 +481,10 @@ async function startNavigation(startLat, startLng, testMode = false) {
     drawOSRMRoute(osrmRoute, routeData.color);
     drawExtras(routeData);
 
-    // Extrair steps de todos os legs
+    // Extrair steps de todos os legs — pular o step "depart" (ponto de partida)
     steps = osrmRoute.legs.flatMap(leg => leg.steps);
-    stepIndex = 0;
+    // Começa no step 1 (pula o "depart" que é exatamente onde o motorista está)
+    stepIndex = steps.length > 1 ? 1 : 0;
     announced.clear();
 
     // Info de duração total
@@ -492,8 +493,8 @@ async function startNavigation(startLat, startLng, testMode = false) {
       eta.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     document.getElementById('b-dist').textContent = fmtDist(osrmRoute.distance);
 
-    // Primeira instrução
-    if (steps.length) updateInstruction(steps[0], steps[0].distance);
+    // Primeira instrução real (não o depart)
+    if (steps.length) updateInstruction(steps[stepIndex], steps[stepIndex].distance);
 
     speak(`Navegação iniciada. ${routeData.name}. Distância total: ${fmtDist(osrmRoute.distance)}.`);
 

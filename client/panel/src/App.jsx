@@ -26,20 +26,49 @@ function playAlert() {
 
 export default function App() {
   const [tab, setTab] = useState('map');
-  const [routes, setRoutes] = useState([]);      // todas as rotas cadastradas
-  const [sessions, setSessions] = useState([]);   // sessões ativas
-  const [positions, setPositions] = useState({});
-  const [alert, setAlert] = useState(null);
+
+  // Eventos e filtro global
+  const [events, setEvents]               = useState([]);
+  const [selectedEventId, setSelectedEventId] = useState('');
+
+  // Rotas e sessões
+  const [allRoutes, setAllRoutes]   = useState([]);
+  const [sessions, setSessions]     = useState([]);
+  const [positions, setPositions]   = useState({});
+  const [alert, setAlert]           = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const alertTimeout = useRef(null);
 
-  // Carregar todas as rotas ao iniciar
+  // Carregar eventos na inicialização
+  useEffect(() => {
+    fetch('/api/events')
+      .then(r => r.json())
+      .then(data => {
+        setEvents(data);
+        // seleciona o evento mais recente automaticamente
+        if (data.length > 0) setSelectedEventId(String(data[0].id));
+      })
+      .catch(() => {});
+  }, []);
+
+  // Carregar todas as rotas
   useEffect(() => {
     fetch('/api/routes')
       .then(r => r.json())
-      .then(setRoutes)
+      .then(setAllRoutes)
       .catch(() => {});
   }, []);
+
+  // Recarregar rotas quando voltar da aba Eventos
+  const reloadRoutes = useCallback(() => {
+    fetch('/api/routes').then(r => r.json()).then(setAllRoutes).catch(() => {});
+    fetch('/api/events').then(r => r.json()).then(setEvents).catch(() => {});
+  }, []);
+
+  // Rotas filtradas pelo evento selecionado
+  const routes = selectedEventId
+    ? allRoutes.filter(r => String(r.event_id) === selectedEventId)
+    : allRoutes;
 
   const updateSession = useCallback((id, patch) => {
     setSessions(prev => prev.map(s => s.id === id ? { ...s, ...patch } : s));
@@ -84,10 +113,37 @@ export default function App() {
     lastPos: positions[s.id] ?? s.lastPos ?? null,
   }));
 
+  // Sessões filtradas pelo evento selecionado
+  const filteredSessions = selectedEventId
+    ? sessionsWithPos.filter(s => {
+        const route = allRoutes.find(r => r.id === s.route_id);
+        return route && String(route.event_id) === selectedEventId;
+      })
+    : sessionsWithPos;
+
+  // Seletor de evento (compartilhado entre abas)
+  const EventSelector = () => (
+    <div className="event-selector">
+      <label>📅 Evento:</label>
+      <select
+        value={selectedEventId}
+        onChange={e => setSelectedEventId(e.target.value)}
+        className="event-selector-select"
+      >
+        <option value="">Todos os eventos</option>
+        {events.map(e => (
+          <option key={e.id} value={String(e.id)}>
+            {e.name}{e.event_date ? ` · ${e.event_date}` : ''}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
   return (
     <div className="layout">
       <header className="topbar">
-        <span className="topbar-brand">🚗 TransporteRJ — Painel de Despacho</span>
+        <span className="topbar-brand">🚗 GO2 — Painel de Despacho</span>
         <nav className="topbar-nav">
           <button className={`nav-btn ${tab === 'map' ? 'active' : ''}`} onClick={() => setTab('map')}>
             🗺 Mapa ao vivo
@@ -98,7 +154,8 @@ export default function App() {
           <button className={`nav-btn ${tab === 'qr' ? 'active' : ''}`} onClick={() => setTab('qr')}>
             📲 QR Codes
           </button>
-          <button className={`nav-btn ${tab === 'events' ? 'active' : ''}`} onClick={() => setTab('events')}>
+          <button className={`nav-btn ${tab === 'events' ? 'active' : ''}`}
+            onClick={() => { setTab('events'); }}>
             📅 Eventos
           </button>
           <button className="nav-btn logout-btn" onClick={async () => {
@@ -112,12 +169,20 @@ export default function App() {
 
       {tab === 'map' && (
         <div className="body-area">
-          <CarList sessions={sessionsWithPos} selectedId={selectedId} onSelect={setSelectedId} />
+          <CarList sessions={filteredSessions} selectedId={selectedId} onSelect={setSelectedId} />
           <div className="map-area">
             {alert && <AlertBanner alert={alert} onClose={() => setAlert(null)} />}
+            <div className="map-event-bar">
+              <EventSelector />
+              <span className="map-event-hint">
+                {routes.length > 0
+                  ? `${routes.length} rota${routes.length > 1 ? 's' : ''} · ${filteredSessions.filter(s => s.status === 'active').length} ativo${filteredSessions.filter(s => s.status === 'active').length !== 1 ? 's' : ''}`
+                  : events.length === 0 ? 'Crie um evento na aba Eventos' : 'Selecione um evento para ver as rotas'}
+              </span>
+            </div>
             <MapView
               routes={routes}
-              sessions={sessionsWithPos}
+              sessions={filteredSessions}
               selectedId={selectedId}
               onSelectSession={setSelectedId}
             />
@@ -125,9 +190,23 @@ export default function App() {
         </div>
       )}
 
-      {tab === 'qr' && <QRManager />}
-      {tab === 'history' && <HistoryView />}
-      {tab === 'events' && <EventsManager />}
+      {tab === 'qr' && (
+        <QRManager
+          routes={routes}
+          eventSelector={<EventSelector />}
+        />
+      )}
+
+      {tab === 'history' && (
+        <HistoryView
+          selectedEventId={selectedEventId}
+          eventSelector={<EventSelector />}
+        />
+      )}
+
+      {tab === 'events' && (
+        <EventsManager onSave={reloadRoutes} />
+      )}
     </div>
   );
 }

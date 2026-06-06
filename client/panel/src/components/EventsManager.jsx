@@ -8,7 +8,7 @@ const COLORS = [
   '#f39c12','#1abc9c','#e91e63','#00bcd4','#ff5722',
 ];
 
-export default function EventsManager() {
+export default function EventsManager({ onSave }) {
   const [events, setEvents]       = useState([]);
   const [loading, setLoading]     = useState(true);
   const [view, setView]           = useState('list');   // 'list' | 'new-event' | 'edit-route'
@@ -226,6 +226,7 @@ export default function EventsManager() {
         });
       }
       await fetchEvents();
+      onSave?.();
       setView('list');
     } catch {
       setMsg('Erro ao salvar. Tente novamente.');
