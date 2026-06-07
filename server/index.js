@@ -214,7 +214,7 @@ app.get('/api/sessions', (req, res) => {
 app.get('/api/sessions/all', (req, res) => {
   const rows = db.prepare(`
     SELECT s.id, s.driver_name, s.driver_phone, s.departure_time, s.status, s.created_at,
-           r.name AS route_name, r.color
+           s.route_id, r.name AS route_name, r.color
     FROM sessions s JOIN routes r ON s.route_id = r.id
     ORDER BY s.created_at DESC LIMIT 200
   `).all();

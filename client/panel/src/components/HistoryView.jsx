@@ -32,9 +32,9 @@ export default function HistoryView({ allRoutes = [], selectedEventId, eventSele
   }, [fetchSessions]);
 
   // Filtro por evento — mostra tudo se nenhum evento selecionado
-  const filteredSessions = selectedEventId
+  const filteredSessions = (selectedEventId && allRoutes.length > 0)
     ? sessions.filter(s => {
-        const route = allRoutes.find(r => r.id === s.route_id);
+        const route = allRoutes.find(r => String(r.id) === String(s.route_id));
         return route && String(route.event_id) === selectedEventId;
       })
     : sessions;
@@ -88,7 +88,7 @@ export default function HistoryView({ allRoutes = [], selectedEventId, eventSele
     if (!pts.length) return;
 
     const session = filteredSessions.find(s => s.id === selectedSession);
-    const color   = session?.color || '#1565c0';
+    const color   = session?.color || '#3db33f';
     const latlngs = pts.map(p => [p.lat, p.lng]);
 
     const line = L.polyline(latlngs, { color, weight: 5, opacity: 0.85 }).addTo(map);
