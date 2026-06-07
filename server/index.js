@@ -321,7 +321,24 @@ io.on('connection', (socket) => {
     }
 
     db.prepare('UPDATE sessions SET status = ?, last_seen = ? WHERE id = ?').run('active', Date.now(), session_id);
-    io.to('panel').emit('session:update', { session_id, status: 'active' });
+
+    // Emite sessão completa para o painel adicionar/atualizar a lista
+    io.to('panel').emit('session:joined', {
+      id: session_id,
+      driver_name: row.driver_name,
+      driver_phone: row.driver_phone,
+      route_id: row.route_id,
+      route_name: row.route_name,
+      color: row.color,
+      departure_time: row.departure_time,
+      status: 'active',
+      created_at: row.created_at,
+      coordinates: JSON.parse(row.coordinates),
+      checkpoints: JSON.parse(row.checkpoints || '[]'),
+      off_route: 0,
+      lastPos: null,
+    });
+
     socket.emit('driver:joined', { session_id, driver_name: row.driver_name, route_name: row.route_name, departure_time: row.departure_time });
   });
 

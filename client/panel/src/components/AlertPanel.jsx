@@ -19,6 +19,7 @@ export default function AlertPanel({ alerts, onDismiss }) {
 
   const offRoute = alerts.filter(a => a.type === 'off_route');
   const offline  = alerts.filter(a => a.type === 'offline');
+  const online   = alerts.filter(a => a.type === 'online');
   const total    = alerts.length;
 
   if (total === 0) return null;
@@ -31,6 +32,9 @@ export default function AlertPanel({ alerts, onDismiss }) {
         <span className="alert-panel-title">
           {total} alerta{total !== 1 ? 's' : ''} ativos
         </span>
+        {online.length > 0 && (
+          <span className="alert-chip chip-online">🟢 {online.length} online</span>
+        )}
         {offRoute.length > 0 && (
           <span className="alert-chip chip-offroute">⚠️ {offRoute.length} fora da rota</span>
         )}
@@ -46,16 +50,22 @@ export default function AlertPanel({ alerts, onDismiss }) {
           {alerts.map(a => (
             <div
               key={a.id}
-              className={`alert-item ${a.type === 'off_route' ? 'alert-offroute' : 'alert-offline'}`}
+              className={`alert-item ${
+                a.type === 'off_route' ? 'alert-offroute'
+                : a.type === 'online'  ? 'alert-online'
+                : 'alert-offline'
+              }`}
             >
               <div className="alert-item-icon">
-                {a.type === 'off_route' ? '⚠️' : '📡'}
+                {a.type === 'off_route' ? '⚠️' : a.type === 'online' ? '🟢' : '📡'}
               </div>
               <div className="alert-item-body">
                 <strong className="alert-item-driver">{a.driver_name}</strong>
                 <span className="alert-item-desc">
                   {a.type === 'off_route'
                     ? `Fora da rota · ${a.dist ? a.dist + 'm' : ''} · ${a.route_name}`
+                    : a.type === 'online'
+                    ? `Entrou online · ${a.route_name}`
                     : `Perdeu sinal · ${a.route_name}`}
                 </span>
                 <span className="alert-item-meta">

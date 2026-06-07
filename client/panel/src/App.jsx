@@ -116,6 +116,24 @@ export default function App() {
       }
     });
 
+    // ── Novo motorista entrou (via QR Code) ──
+    socket.on('session:joined', (session) => {
+      setSessions(prev => {
+        const exists = prev.find(s => s.id === session.id);
+        if (exists) {
+          return prev.map(s => s.id === session.id ? { ...s, status: 'active' } : s);
+        }
+        return [...prev, session];
+      });
+      addAlert('online', {
+        session_id: session.id,
+        driver_name: session.driver_name,
+        route_name: session.route_name,
+        driver_phone: session.driver_phone,
+      });
+      playBeep(660, 2); // tom médio = motorista online
+    });
+
     // ── Alerta: motorista fora da rota ──
     socket.on('alert:off_route', (data) => {
       addAlert('off_route', data);
@@ -126,6 +144,7 @@ export default function App() {
       socket.off('panel:state');
       socket.off('position:update');
       socket.off('session:update');
+      socket.off('session:joined');
       socket.off('alert:off_route');
     };
   }, [updateSession]);
