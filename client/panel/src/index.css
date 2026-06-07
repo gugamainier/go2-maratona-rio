@@ -3,13 +3,15 @@
 :root {
   --sidebar-w: 320px;
   --topbar-h: 56px;
-  --blue: #1565c0;
-  --green: #2e7d32;
+  --blue: #3db33f;
+  --green: #3db33f;
+  --green-dark: #2a8a2c;
+  --green-light: #e8f5e9;
   --red: #c62828;
   --orange: #e65100;
-  --bg: #eef2f7;
+  --bg: #f0f7f0;
   --card: #ffffff;
-  --border: #dde3ec;
+  --border: #d6e8d6;
   --text: #1a2332;
   --muted: #607d8b;
   --radius: 10px;
@@ -130,8 +132,8 @@ button {
   transition: background .15s;
 }
 
-.car-card:hover { background: #f5f8ff; }
-.car-card.selected { background: #e8f0fe; }
+.car-card:hover { background: #f2faf2; }
+.car-card.selected { background: #dff0df; }
 .car-card.off-route { border-left: 3px solid var(--orange); }
 
 .car-header {
@@ -539,7 +541,7 @@ button {
 }
 .badge-active  { background: #e8f5e9; color: #2e7d32; }
 .badge-offline { background: #f5f5f5; color: #757575; }
-.badge-done    { background: #e3f2fd; color: #1565c0; }
+.badge-done    { background: #e8f5e9; color: #3db33f; }
 
 .btn-load {
   padding: 9px 18px;
@@ -553,7 +555,7 @@ button {
   transition: background .15s;
   align-self: center;
 }
-.btn-load:hover { background: #1976d2; }
+.btn-load:hover { background: #34a136; }
 
 .history-map { flex: 1; }
 
@@ -713,7 +715,7 @@ button {
 /* Botões */
 .btn-primary {
   padding: 9px 18px;
-  background: #1565c0;
+  background: #3db33f;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -722,21 +724,21 @@ button {
   cursor: pointer;
   transition: background .15s;
 }
-.btn-primary:hover    { background: #1976d2; }
+.btn-primary:hover    { background: #34a136; }
 .btn-primary:disabled { background: #90a4ae; cursor: not-allowed; }
 
 .btn-outline {
   padding: 7px 14px;
   background: transparent;
-  color: #1565c0;
-  border: 1.5px solid #1565c0;
+  color: #3db33f;
+  border: 1.5px solid #3db33f;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: background .15s;
 }
-.btn-outline:hover { background: #e3f2fd; }
+.btn-outline:hover { background: #e8f5e9; }
 
 .btn-outline-green {
   padding: 7px 14px;
@@ -772,7 +774,7 @@ button {
 .btn-link {
   background: none;
   border: none;
-  color: #1565c0;
+  color: #3db33f;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -830,7 +832,7 @@ button {
 .btn-back {
   background: none;
   border: none;
-  color: #1565c0;
+  color: #3db33f;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -869,7 +871,7 @@ button {
   transition: border-color .2s;
   resize: vertical;
 }
-.form-field input:focus, .form-field textarea:focus { border-color: #1565c0; }
+.form-field input:focus, .form-field textarea:focus { border-color: #3db33f; }
 
 .field-hint { font-size: 11px; color: var(--muted); margin-top: 4px; display: block; }
 
@@ -926,8 +928,8 @@ button {
 
 /* Instruções do mapa */
 .route-map-instructions {
-  background: #f0f4ff;
-  border: 1px solid #c5d3f0;
+  background: #f0f8f0;
+  border: 1px solid #a8d4a8;
   border-radius: 10px;
   padding: 14px;
   font-size: 13px;

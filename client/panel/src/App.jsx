@@ -1,5 +1,26 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import socket from './socket.js';
+
+// ── EventSelector extraído fora do App para evitar remount a cada render ──────
+function EventSelector({ events, selectedEventId, onSelect, compact = false }) {
+  return (
+    <div className="event-selector">
+      {!compact && <label>📅 Evento</label>}
+      <select
+        value={selectedEventId}
+        onChange={e => onSelect(e.target.value)}
+        className="event-selector-select"
+      >
+        <option value="">— Selecione um evento —</option>
+        {events.map(e => (
+          <option key={e.id} value={String(e.id)}>
+            {e.name}{e.event_date ? ` · ${e.event_date}` : ''}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 import MapView from './components/MapView.jsx';
 import CarList from './components/CarList.jsx';
 import AlertPanel from './components/AlertPanel.jsx';
@@ -152,24 +173,6 @@ export default function App() {
   // ── Seletor de evento compartilhado ──────────────────────────────────────
   const selectedEvent = events.find(e => String(e.id) === selectedEventId);
 
-  const EventSelector = ({ compact = false }) => (
-    <div className="event-selector">
-      {!compact && <label>📅 Evento</label>}
-      <select
-        value={selectedEventId}
-        onChange={e => setSelectedEventId(e.target.value)}
-        className="event-selector-select"
-      >
-        <option value="">— Selecione um evento —</option>
-        {events.map(e => (
-          <option key={e.id} value={String(e.id)}>
-            {e.name}{e.event_date ? ` · ${e.event_date}` : ''}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-
   // ── Tela de prompt ────────────────────────────────────────────────────────
   const SelectEventPrompt = ({ icon, label }) => (
     <div className="select-event-prompt">
@@ -177,7 +180,7 @@ export default function App() {
       <p className="sep-title">{label}</p>
       <p className="sep-sub">Selecione o evento para continuar</p>
       <div style={{ marginTop: 20 }}>
-        <EventSelector />
+        <EventSelector events={events} selectedEventId={selectedEventId} onSelect={setSelectedEventId} />
       </div>
       {events.length === 0 && (
         <p className="sep-hint">
@@ -242,7 +245,7 @@ export default function App() {
                   onDismiss={dismissAlert}
                 />
                 <div className="map-event-bar">
-                  <EventSelector compact />
+                  <EventSelector events={events} selectedEventId={selectedEventId} onSelect={setSelectedEventId} compact />
                   <span className="map-event-hint">
                     {selectedEvent?.name} ·{' '}
                     {routes.length} rota{routes.length !== 1 ? 's' : ''} ·{' '}
@@ -265,7 +268,7 @@ export default function App() {
         <HistoryView
           allRoutes={allRoutes}
           selectedEventId={selectedEventId}
-          eventSelector={<EventSelector />}
+          eventSelector={<EventSelector events={events} selectedEventId={selectedEventId} onSelect={setSelectedEventId} />}
         />
       )}
 
@@ -273,7 +276,7 @@ export default function App() {
       {tab === 'qr' && (
         !selectedEventId
           ? <SelectEventPrompt icon="📲" label="QR Codes" />
-          : <QRManager routes={routes} eventSelector={<EventSelector compact />} selectedEvent={selectedEvent} />
+          : <QRManager routes={routes} eventSelector={<EventSelector events={events} selectedEventId={selectedEventId} onSelect={setSelectedEventId} compact />} selectedEvent={selectedEvent} />
       )}
 
       {/* ── EVENTOS ── */}
